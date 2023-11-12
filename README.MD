@@ -22,12 +22,15 @@ Projeto de detecção de queda de tensão na rede elétrica, motivado pelas reco
 
 NOTA: devido à alta sensibilidade do sensor de corrente, é aconselhavel afastar o sensor do módulo ESP32, uma vez que a recepção ou envio de mensagens podem afetar o desempenho do sensor de corrente!
 
-ATENÇÃO: Para o bom funcionamento do programa, é necessário alterar os seguintes parametros:
-- Linha 76: alterar `+3519xxxxxxxx` para o número de envio da mensagem.
+ATENÇÃO: Para o bom funcionamento do programa, é necessário alterar o arquivo variables_example.h renomeando para variables.h e incluir neste header tanto a mensagem para o SMS quanto os destinatários:
+```cpp
+const static char* MESSAGE = "<ADD HERE THE MESSAGE YOU WANT TO SEND IN THE SMS>";
+const static char* NUMBERS[] = {"<RECIPIENT_1>", "<RECIPIENT_2>"}; // Add phone numbers with "+" and the contry code, e.g. +17077225041
+```
 ## Funcionamento
 
 - O sensor fica constantemente efetuando leituras do valor da corrente que percorre o equipamento a ele ligado.
-- Detectada uma queda de tensão, a corrente será nula, ao que o sensor envia a mensagem `FOI DETECTADA UMA QUEDA DE TENSÃO!` para o número do celular adicionado a linha 76 do código.
+- Detectada uma queda de tensão, a corrente será nula, ao que o sensor envia a mensagem `FOI DETECTADA UMA QUEDA DE TENSÃO!` para o(s) número(s) do celular adicionado(s) ao arquivo `varibles.h`.
 ## Referência
 
  - [Detetor de falha de energia com A ESP32 - ElectroFun.pt](https://www.electrofun.pt/blog/detetor-de-falha-de-energia-com-esp32/)
