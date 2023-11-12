@@ -1,6 +1,29 @@
-#define SIM800L_IP5306_VERSION_20200811
+/* Copyright (C) 2023 Renan Alencar - All Rights Reserved
+ * You may use, distribute and modify this code under the
+ * terms of the GNU license, which unfortunately won't be
+ * written for another century.
+ *
+ * You should have received a copy of the GNU license with
+ * this file. If not, please write to: renan.costaalencar@gmail.com,
+ * or visit : https://spdx.org/licenses/GPL-3.0-or-later.html
+ *
+ * Project based on DETETOR DE FALHA DE ENERGIA published by 
+ * Electrofun Blog (https://www.electrofun.pt/blog/detetor-de-falha-de-energia-com-esp32/)
+ */
+
+/**
+ * @file power_outage_detector.ino
+ * @brief Code responsible for detecting power outage and sending
+ * an SMS to the target recipients.
+ * @author Renan Alencar
+ * Contact: https://linktr.ee/mr.costaalencar
+ *
+ */
+
+#define SIM800H_IP5306_VERSION_20200811
 
 #include "utilities.h"
+#include "variables.h"
 
 #define SerialMon  Serial
 #define SerialAT  Serial1
@@ -8,8 +31,8 @@
 static const uint32_t AT_BAUD  = 115200;
 static const uint32_t MON_BAUD = 115200;
 
-const char* SUBJECT = "AIRE INFORMA: FOI DETECTADA UMA QUEDA DE TENSAO! ENTRE EM CONTATO COM A NEOENERGIA PERNAMBUCO 116.";
-const char* SMS_TARGETS[] = {"+5581982335881", "+5581994243992"};
+const char* SUBJECT = MESSAGE;
+const auto SMS_TARGETS = NUMBERS;
 
 const int SENSOR_IN = 34;
 int mVperAmp        = 100;
@@ -28,7 +51,8 @@ void setup() {
   setupModem();
   delay(5000);
 
-  xTaskCreatePinnedToCore(triggerAlert, "Task1", 10000, NULL, 1, &Task1, 0); // atribuir a tarefa de enviar a mensagem ao CORE_0 da ESP32 para alivar o CORE_1
+  // Assign the task of sending the message to CORE_0 of ESP32 to relieve CORE_1
+  xTaskCreatePinnedToCore(triggerAlert, "Task1", 10000, NULL, 1, &Task1, 0);
 }
 
 void triggerAlert(void * pvParameters) {
@@ -46,10 +70,10 @@ void triggerAlert(void * pvParameters) {
 
 void loop() {
   Serial.println ("");
-  Voltage = getVPP(); // função que lê o valor analógico e transforma em valor de tensão
-  VRMS = (Voltage / 2.0) * 0.707;  
-  AmpsRMS = ((VRMS * 1000) / mVperAmp) - 0.50; // calcula a corrente percorrida, dado o datasheet do sensor. Pode ser necessário corrigir este valor, 
-  Watt = (AmpsRMS * 240 / 1.2);                // basta alterar o valor "-0.50" para outro quando o circuito está berto (sensor não conectado ao equipamento a medir)
+  Voltage = getVPP(); // Function that reads the analog value and converts it into a voltage value
+  VRMS    = (Voltage / 2.0) * 0.707;  
+  AmpsRMS = ((VRMS * 1000) / mVperAmp) - 0.50; // Calculate the current flow, given the sensor datasheet. It might be necessary to correct this value,
+  Watt    = (AmpsRMS * 240 / 1.2);             // simply by changing the value "-0.50" to another when the circuit is open (sensor not connected to the measuring equipment).
 
   Serial.print(AmpsRMS);
   Serial.print(" Amps RMS  ---  ");
