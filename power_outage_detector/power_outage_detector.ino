@@ -57,7 +57,7 @@ void setup() {
 
 void triggerAlert(void * pvParameters) {
   for (;;) {
-    if (AmpsRMS < 0.05) {
+    while (AmpsRMS < 0.05) {
       for (int i = 0; i < sizeof(SMS_TARGETS) / sizeof(char*); i++) {
         sendSMS(SMS_TARGETS[i]);
         updateSerialAT();
